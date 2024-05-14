@@ -1,0 +1,77 @@
+
+
+.card-header {
+    background: #726c49 !important;
+    color: white;
+    font-family: var(--bs-font-sans-serif) !important;
+}
+
+    .form-title {
+        font-size: 24px;
+        margin-bottom: 20px;
+    }
+
+    .savebtn {
+        background-color: #726c49 !important ;
+    color: white !important;
+    }
+    .savebtn:hover{
+        background-color: black !important;
+        color: white !important;
+    }
+
+    .button_save
+    {
+        padding: 5px 31px 8px 31px !important;
+    }
+
+.form-control {
+    border-radius: 4px !important;
+    border: 1px solid #726c49 !important;
+}
+
+.form-control:focus {
+    border-color: #726c49 !important;
+}
+
+.loginbtn:hover{
+    background-color: black !important;
+    color: white;
+}
+
+.loginbtn{
+    background-color: #726c49;
+}
+
+
+.add_storebtn{
+    background-color: #726c49;
+    color: white;
+}
+.add_storebtn:hover{
+    background-color: black !important;
+    color: white;
+}
+
+
+.DataTables_Table_0_filter{
+    float: right;
+}
+.page-item.active .page-link {
+    z-index: 3;
+    color: #fff;
+    background-color: #726C49 !important;
+    border-color: #726C49;
+}
+
+.page-link {
+    position: relative;
+    display: block;
+    padding: var(--bs-pagination-padding-y) var(--bs-pagination-padding-x);
+    font-size: var(--bs-pagination-font-size);
+    color: #000000;
+    text-decoration: none;
+    background-color: var(--bs-pagination-bg);
+    border: var(--bs-pagination-border-width) solid var(--bs-pagination-border-color);
+    transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+}

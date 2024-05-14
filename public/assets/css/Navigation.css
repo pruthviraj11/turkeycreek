@@ -1,0 +1,15 @@
+.Navigation:hover{
+    background: #555241 !important;
+    color: #ffff;
+}
+
+
+.Navigation.active{
+  background: #555241 !important;
+}
+
+
+.logout{
+    margin-top: 20px;
+    padding: 8px 24px;   
+}
