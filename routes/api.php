@@ -58,7 +58,9 @@ Route::middleware(['jwt'])->group(function () {
     Route::get('/user-Info', [LoginApiController::class, 'userInfo']);
 
     Route::get('/vip_member_benefits', [MemberApiController::class, 'vip_member_benefits']);
-    Route::get('/membership_details', [MemberApiController::class, 'membership_details']);
+    Route::get('/subscription_details', [MemberApiController::class, 'subscription_details']);
+    Route::get('/cancel_subscription/{subscriptionId}', [MemberApiController::class, 'cancel_subscription']);
+
 
 
     /////////////////////// Notification Api Starts ///////////////////////////////////

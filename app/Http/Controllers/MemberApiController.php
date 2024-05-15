@@ -30,6 +30,8 @@ use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\Security\Security;
 use Stripe\Stripe;
 use Stripe\Customer;
+use Carbon\Carbon;
+use Stripe\Subscription;
 
 
 use App\Mail\PasswordResetMail;
@@ -86,19 +88,20 @@ class MemberApiController extends Controller
         }
     }
 
-    public function membership_details(Request $request)
+    public function subscription_details(Request $request)
     {
-
         Stripe::setApiKey(env('STRIPE_SECRET'));
+        $userId = $request->auth_user_id;
 
+        $user = User::where('id', $userId)->first();
         // Retrieve the Stripe customer
-        $stripeCustomerId = auth()->user()->stripe_id;
-        dd($stripeCustomerId);
+        $stripeCustomerId = $user->stripe_id;
         $customer = Customer::retrieve($stripeCustomerId);
 
         // Retrieve subscription data
         $subscriptionDetails = [];
         foreach ($customer->subscriptions->data as $subscription) {
+
             // Calculate remaining days until the subscription expires
             $currentPeriodEnd = Carbon::createFromTimestamp($subscription->current_period_end);
             $remainingDays = $currentPeriodEnd->diffInDays(Carbon::now());
@@ -110,33 +113,34 @@ class MemberApiController extends Controller
                 'payment_method' => $subscription->default_payment_method,
                 'remaining_days' => $remainingDays,
             ];
+            // dd($subscriptionDetails);
         }
-
-        // Retrieve additional subscription details
-        foreach ($subscriptionDetails as &$subscription) {
-            $subscriptionData = RestaurantSubscription::where('stripe_subscription_id', $subscription['id'])->first();
-            if ($subscriptionData) {
-                $restaurantData = Restaurant::find($subscriptionData->restaurant_id);
-                $restaurantPlan = RestaurantsPackage::find($subscriptionData->package_id);
-                if ($restaurantData && $restaurantPlan) {
-                    $subscription['restaurant_name'] = $restaurantData->restaurant_name;
-                    $subscription['plan_name'] = $restaurantPlan->tagline;
-                } else {
-                    $subscription['restaurant_name'] = 'N/A';
-                    $subscription['plan_name'] = 'N/A';
-                }
-            } else {
-                $subscription['restaurant_name'] = 'N/A';
-                $subscription['plan_name'] = 'N/A';
-            }
-        }
-        unset($subscription);
-
         // Return the subscription details as JSON response
         return response()->json($subscriptionDetails);
-
 
     }
 
 
+    public function cancel_subscription(Request $request,$subscriptionId)
+    {
+        Stripe::setApiKey(env('STRIPE_SECRET'));
+
+        try {
+
+            $subscription = Subscription::retrieve($subscriptionId);
+            $currentPeriodEnd = Carbon::createFromTimestamp($subscription->current_period_end);
+            $subscription->cancel(['at_period_end' => true]);
+            $cancellationTime = $currentPeriodEnd->format('Y-m-d H:i:s');
+
+            $data = [
+                'cancellation_time' => $cancellationTime,
+            ];
+
+            return ApiService::response(true, $data, 'Subscription cancellation scheduled successfully. It will end at the end of the current billing period, which is on '. $cancellationTime .'.');
+
+        }catch (\Exception $e) {
+            // Return JSON response with error message if cancellation fails
+            return ApiService::response(false, null, 'Failed to cancel subscription. ' . $e->getMessage());
+        }
+    }
 }
