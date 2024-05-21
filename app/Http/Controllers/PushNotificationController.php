@@ -9,7 +9,7 @@ use App\Models\Product;
 use App\Models\User;
 use App\Models\Vendor;
 use Illuminate\Support\Facades\Storage;
-
+use App\Models\Event;
 use App\Http\Requests\Product\CreateProductRequest;
 use App\Http\Requests\Product\UpdateProductRequest;
 use Illuminate\Support\Facades\Auth;
@@ -55,7 +55,6 @@ class PushNotificationController extends Controller
             ];
             if ($request->has('sendToAllMembers')) {
                 $users = User::all();
-                dd($users);
                 foreach ($users as $user) {
                     $data['user_id'] = $user->id;
                     $this->sendPushNotification($data, $user->notification_token);
@@ -68,7 +67,7 @@ class PushNotificationController extends Controller
                 $userData = User::whereIn('id', $selectedUsers)->get();
                 foreach ($userData as $user) {
                     $data['user_id'] = $user->id;
-                    $this->sendPushNotification($data, $user->notification_token);
+                    // $this->sendPushNotification($data, $user->notification_token);
                     PushNotification::create($data);
                 }
             }
@@ -101,5 +100,40 @@ class PushNotificationController extends Controller
         }
     }
 
+
+    public function list(Request $request)
+    {
+
+        // $events = Event::paginate(8);
+
+        if ($request->ajax()) {
+            $events = PushNotification::select('push_notifications.*')->orderBy('id','desc')->get();
+
+
+
+
+            return Datatables::of($events)
+                ->addIndexColumn()
+                ->addColumn('image', function ($row) {
+
+                    $imageurl = Storage::url($row->image);
+                    $image = '<img src="' . $imageurl . '" width="150"  />';
+                    return $image;
+                })
+
+                ->addColumn('action', function ($row) {
+
+                    $edit_url = route('event.edit', $row->id);
+                    $delete_url = route('event.destroy', $row->id);
+                    $btn = '<a href="' . $edit_url . '" class="btn btn-warning"><i class="fa fa-edit"></i></a>
+                    <a href="' . $delete_url . '" class="btn btn-danger" onclick="return deleteConfirm()"><i class="fa fa-trash"></i></a>';
+                    return $btn;
+                })
+                ->rawColumns(['action', 'image'])
+                ->make(true);
+        }
+
+        return view('notifications.push-notification-listing');
+    }
 
 }

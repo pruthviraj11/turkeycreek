@@ -157,6 +157,17 @@
             </x-slot>
             {{ __('Push Notification') }}
         </x-nav-link>
+
+        <x-nav-link href="{{ route('pushNotification.list') }}" :active="request()->routeIs('user.index')" style="text-decoration: none"
+            class="Navigation">
+            <x-slot name="icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22px" height="22px" fill="#ffff">
+                    <path d="M0 0h24v24H0z" fill="none"/>
+                    <path d="M11 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm5.5-6c0-2.29-1.62-4.21-3.75-4.72V13c0 .55-.45 1-1 1H8c-.55 0-1-.45-1-1v-1.72c-2.13.51-3.75 2.43-3.75 4.72v3.78l-2 2v1h16v-1l-2-2v-3.78zM12 2c1.1 0 2 .9 2 2h-4c0-1.1.9-2 2-2zm6.3 5.3l-1.27-1.27C16.55 5.16 14.82 4 13 4s-3.55 1.16-4.02 2.73L7.7 7.3c-.47.47-1.08.7-1.7.7s-1.23-.23-1.7-.7L3.7 6.03C2.26 7.47 1.5 9.31 1.5 11v5.77l-.94.94c-.19.2-.31.46-.31.76s.12.56.31.76c.2.19.45.3.74.3h18c.29 0 .54-.11.74-.3.19-.2.31-.46.31-.76s-.12-.56-.31-.76l-.94-.94V11c0-1.69-.76-3.53-2.2-4.97zM15.5 20h-7l1.49 1.49c.19.2.45.3.74.3s.56-.1.76-.29c.2-.2.3-.46.3-.75V18h2v1c0 .55.45 1 1 1s1-.45 1-1v-1h2v1.25c0 .28.11.54.3.74.2.19.46.29.75.29.29 0 .55-.1.74-.3.2-.2.3-.46.3-.75L15.5 20z"/>
+                </svg>
+            </x-slot>
+            {{ __('Push Notification List') }}
+        </x-nav-link>
         {{-- <x-nav-link class="mt-0"> --}}
         <form method="POST" action="{{ route('logout') }}" class="text-white Navigation logout">
             @csrf

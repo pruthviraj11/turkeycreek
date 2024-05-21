@@ -63,9 +63,42 @@
                                         </select>
                                     </div>
                                 </div>
+                                <div class="col-md-6 col-sm-6 mb-1">
+                                    <div class="form-group">
+                                        <label class="form-label" for="categoriesimage">Category Image</label>
+                                        <input type="file" id="categoriesimage" class="form-control" name="categoriesimage">
+                                        <span class="text-danger">
+                                            @error('categoriesimage')
+                                                {{ $message }}
+                                            @enderror
+                                        </span>
+
+                                            <div class="mt-1">
+                                                @if ($category != '' && $category->categoriesimage)
+                                                    <div class="" style="width: 100px; height: 100px; overflow: hidden;">
+                                                        <img src="{{ Storage::url($category->categoriesimage) }}" class="img-fluid" alt="Category Image">
+                                                    </div>
+                                                @else
+                                                    <div class="" style="width: 100px; height: 100px; overflow: hidden;">
+                                                        <img src="{{ asset('storage/coupon_images/no_img.png') }}" class="img-fluid" alt="No Image">
+                                                    </div>
+                                                @endif
+                                            </div>
+                                            <p class="mx-1 m-1">
+                                                <a class="btn btn-danger btn-sm removeimage" data-toggle='tooltip' data-placement='top' title='Delete Images' href="{{ route('app-Category-photos', ['encrypted_id' => encrypt($category->id)]) }}" onclick="return RemoveProfileImage('Are you sure you want to remove Profile Photo', this)">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-x-circle">
+                                                        <circle cx="12" cy="12" r="10"></circle>
+                                                        <line x1="15" y1="9" x2="9" y2="15"></line>
+                                                        <line x1="9" y1="9" x2="15" y2="15"></line>
+                                                    </svg>
+                                                </a>
+                                            </p>
+
+                                    </div>
+                                </div>
                             </div>
-                           
-                        
+
+
                             <div class="col-md-12 text-center mt-4">
                                 <button type="submit" class="btn btn-secondary savebtn button_save">Save</button>
                             </div>

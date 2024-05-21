@@ -110,6 +110,8 @@ Route::middleware('auth')->group(function () {
 
     ///////////////////Route For Push Notification Starts/////////////////////////////
     Route::resource('pushNotification', PushNotificationController::class);
+    Route::get('pushNotificationList', [PushNotificationController::class,'list'])->name('pushNotification.list');
+    // Route::get('pushNotificationList', [PushNotificationController::class, 'list'])->name('pushNotification.listing');
 
     ///////////////////Route For Push Notification Ends/////////////////////////////
 
@@ -124,6 +126,8 @@ Route::middleware('auth')->group(function () {
     Route::get('category/edit/{category}', [CategoryController::class, 'edit'])->name('category-edit');
     Route::put('category/update/{category}', [CategoryController::class, 'update'])->name('category-update');
     Route::delete('category/destroy/{category}', [CategoryController::class, 'destroy'])->name('category-delete');
+    Route::get('Category/photos/{encrypted_id}', [CategoryController::class, 'RemoveCategoryPhoto'])->name('app-Category-photos');
+
 });
 
 
