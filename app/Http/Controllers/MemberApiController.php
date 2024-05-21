@@ -101,14 +101,22 @@ class MemberApiController extends Controller
         // Retrieve subscription data
         $subscriptionDetails = [];
         foreach ($customer->subscriptions->data as $subscription) {
-
             // Calculate remaining days until the subscription expires
+            $startDate = Carbon::createFromTimestamp($subscription->created);
+
             $currentPeriodEnd = Carbon::createFromTimestamp($subscription->current_period_end);
+
             $remainingDays = $currentPeriodEnd->diffInDays(Carbon::now());
+
+            $user->start_date = $startDate;
+            $user->end_date = $currentPeriodEnd;
+            $user->save();
+
 
             $subscriptionDetails[] = [
                 'id' => $subscription->id,
                 'status' => $subscription->status,
+                'start_date' => date('d/m/Y',$subscription->created),
                 'current_period_end' => date('d/m/Y', $subscription->current_period_end),
                 'payment_method' => $subscription->default_payment_method,
                 'remaining_days' => $remainingDays,

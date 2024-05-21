@@ -27,6 +27,8 @@
                                             <th>Sr No.</th>
                                             <th>Name</th>
                                             <th>Email</th>
+                                            <th>Subscription Start Date</th>
+                                            <th>Subscription End Date</th>
                                             <th>Created At</th>
                                             <th>Updated At</th>
                                             {{-- <th>Description</th> --}}
@@ -66,11 +68,37 @@
                     name: 'email'
                 },
                 {
+                    data: 'start_date',
+                    name: 'start_date',
+                    render: function(data) {
+                    if (data) {
+                        return new Date(data).toLocaleDateString();
+                    } else {
+                        return '';
+                    }
+                }
+                },
+                {
+                    data: 'end_date',
+                    name: 'end_date',
+                    render: function(data) {
+                    if (data) {
+                        return new Date(data).toLocaleDateString();
+                    } else {
+                        return '';
+                    }
+                }
+                },
+                {
                     data: 'created_at',
                     name: 'created_at',
                     render: function(data) {
+                    if (data) {
                         return new Date(data).toLocaleDateString();
+                    } else {
+                        return '';
                     }
+                }
                 },
                 {
                     data: 'updated_at',

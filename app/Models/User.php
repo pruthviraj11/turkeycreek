@@ -30,7 +30,9 @@ class User extends Authenticatable
         'expires_at',
         'reset_otp',
         'reset_token_expires_at',
-        'notification_token'
+        'notification_token',
+        'start_date',
+        'end_date'
     ];
 
     /**

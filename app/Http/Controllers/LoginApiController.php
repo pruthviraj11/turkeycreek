@@ -49,6 +49,7 @@ class LoginApiController extends Controller
 
             $user->update([
                 'verify_phone' => true,
+                'access_token' => $accessToken,
                 'refresh_token' => $refreshToken,
                 'expires_at' => $tokenExpiration,
             ]);

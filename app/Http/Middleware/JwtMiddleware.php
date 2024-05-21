@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\Registration;
+use App\Models\User;
 use Closure;
 use Illuminate\Http\Request;
 use Lcobucci\JWT\Configuration;
@@ -26,7 +27,7 @@ class JwtMiddleware
             $parsedToken = $config->parser()->parse($token);
             $userId = $parsedToken->claims()->get('jti');
 
-            $user = Registration::find($userId);
+            $user = User::find($userId);
             if (!$user) {
                 return response()->json(['error' => 'Unauthorized. User not found.'], 401);
             }
