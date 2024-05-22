@@ -162,25 +162,17 @@ class LoginApiController extends Controller
                 $data['password'] = Hash::make($data['password']);
             }
             unset($data['auth_user_id']);
-
-            if ($request->has('profilephoto')) {
-                $profilePhotoData = base64_decode($data['profilephoto']);
-                $filename = 'avatar_' . time() . '.png'; // Generate a unique filename with .png extension
-                Storage::disk('public')->put($filename, $profilePhotoData);
-                $data['profilephoto'] = 'storage/app/public/' . $filename;
-            } else {
-                unset($data['profilephoto']);
-            }
             if ($request->image) {
-
                 $imageData = base64_decode($data['image']);
-                $imageFilename = 'image_' . time() . '.png'; // Generate a unique filename with .png extension
-                Storage::disk('public')->put($imageFilename, $imageData);
-                $data['image'] = 'storage/app/public/' . $imageFilename;
+                $filename = 'avatar_' . time() . '.png'; // Generate a unique filename with .png extension
+                Storage::disk('public')->put($filename, $imageData);
+                // $data['image'] = 'storage/app/public/' . $filename;
+                $data['image'] = asset(Storage::url( $filename));
+
             } else {
                 unset($data['image']);
             }
-dd($data);
+
             $user->update($data);
 
             $updated_user = User::where('id', $user_id)->get();
