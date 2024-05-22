@@ -171,6 +171,16 @@ class LoginApiController extends Controller
             } else {
                 unset($data['profilephoto']);
             }
+            if ($request->image) {
+
+                $imageData = base64_decode($data['image']);
+                $imageFilename = 'image_' . time() . '.png'; // Generate a unique filename with .png extension
+                Storage::disk('public')->put($imageFilename, $imageData);
+                $data['image'] = 'storage/app/public/' . $imageFilename;
+            } else {
+                unset($data['image']);
+            }
+dd($data);
             $user->update($data);
 
             $updated_user = User::where('id', $user_id)->get();
@@ -189,6 +199,10 @@ class LoginApiController extends Controller
                 $user->refresh_token = $user->refresh_token ?? '';
                 $user->expires_at = $user->expires_at ?? '';
                 $user->verify_phone = $user->verify_phone ?? 0;
+                $user->date_of_birth = $user->date_of_birth ?? '';
+                $user->gender = $user->gender ?? '';
+                $user->image = $user->image ?? '';
+
                 return $user;
             });
 
@@ -223,6 +237,10 @@ class LoginApiController extends Controller
                 $user->access_token = $user->access_token ?? '';
                 $user->refresh_token = $user->refresh_token ?? '';
                 $user->expires_at = $user->expires_at ?? '';
+                $user->date_of_birth = $user->date_of_birth ?? '';
+                $user->gender = $user->gender ?? '';
+                $user->image = $user->image ?? '';
+
 
                 return $user;
             });

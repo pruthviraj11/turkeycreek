@@ -57,7 +57,7 @@ class MemberApiController extends Controller
 
             $vipMemberships = $vipMemberships->map(function ($membership) {
                 $membership->title = $membership->title ?? '';
-                $membership->image = $membership->image ?? '';
+                $membership->image = (asset($membership->image)) ?? '';
                 $membership->description = $membership->description ?? '';
                 $membership->status = $membership->status ?? '';
                 $membership->created_at = $membership->created_at ?? '';

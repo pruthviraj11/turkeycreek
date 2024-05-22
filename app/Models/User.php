@@ -32,7 +32,10 @@ class User extends Authenticatable
         'reset_token_expires_at',
         'notification_token',
         'start_date',
-        'end_date'
+        'end_date',
+        'date_of_birth',
+        'gender',
+        'image'
     ];
 
     /**
