@@ -164,11 +164,9 @@ class LoginApiController extends Controller
             unset($data['auth_user_id']);
             if ($request->image) {
                 $imageData = base64_decode($data['image']);
-                $filename = 'avatar_' . time() . '.png'; // Generate a unique filename with .png extension
+                $filename = 'avatar_' . time() . '.png';
                 Storage::disk('public')->put($filename, $imageData);
-                // $data['image'] = 'storage/app/public/' . $filename;
-                $data['image'] = asset(Storage::url( $filename));
-
+                $data['image'] = $filename; // Store the filename in the database
             } else {
                 unset($data['image']);
             }
@@ -176,7 +174,6 @@ class LoginApiController extends Controller
             $user->update($data);
 
             $updated_user = User::where('id', $user_id)->get();
-
 
             $users = $updated_user->map(function ($user) {
                 // $user->user_id = $user->user_id ?? 0;
@@ -193,7 +190,7 @@ class LoginApiController extends Controller
                 $user->verify_phone = $user->verify_phone ?? 0;
                 $user->date_of_birth = $user->date_of_birth ?? '';
                 $user->gender = $user->gender ?? '';
-                $user->image = $user->image ?? '';
+                $user->image = $user->image ? asset('storage/' . $user->image) : '';
 
                 return $user;
             });
@@ -203,6 +200,7 @@ class LoginApiController extends Controller
             return ApiService::error(false, 'Error updating user information', $e->getMessage());
         }
     }
+
 
     public function userInfo(Request $request)
     {
@@ -231,7 +229,7 @@ class LoginApiController extends Controller
                 $user->expires_at = $user->expires_at ?? '';
                 $user->date_of_birth = $user->date_of_birth ?? '';
                 $user->gender = $user->gender ?? '';
-                $user->image = $user->image ?? '';
+                $user->image = asset('storage/' . $user->image) ?? '';
 
 
                 return $user;
