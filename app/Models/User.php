@@ -35,7 +35,10 @@ class User extends Authenticatable
         'end_date',
         'date_of_birth',
         'gender',
-        'image'
+        'image',
+        'status',
+        'payment_status',
+        'last_logged_In'
     ];
 
     /**

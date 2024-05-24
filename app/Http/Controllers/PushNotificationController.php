@@ -103,7 +103,6 @@ class PushNotificationController extends Controller
 
     public function list(Request $request)
     {
-
         // $events = Event::paginate(8);
 
         if ($request->ajax()) {

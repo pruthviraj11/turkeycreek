@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use App\Models\Setting;
 use App\Models\User;
 use App\Models\VipMemberships;
 use Illuminate\Http\Request;
@@ -26,8 +27,9 @@ use CodeIgniter\Email\Email;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\Security\Security;
-
-
+use App\Mail\RegisteredMail;
+use App\Models\UserLoginLog;
+use App\Mail\WelcomeMail;
 
 use App\Mail\PasswordResetMail;
 
@@ -52,8 +54,13 @@ class LoginApiController extends Controller
                 'access_token' => $accessToken,
                 'refresh_token' => $refreshToken,
                 'expires_at' => $tokenExpiration,
+                'last_logged_In' => now(),
             ]);
 
+            UserLoginLog::create([
+                'user_id' => $user->id,
+                'last_logged_in' => now(),
+            ]);
             $data = [
                 "user_id" => $user->id,
                 "access_token" => $accessToken,
@@ -104,9 +111,53 @@ class LoginApiController extends Controller
         return $token->toString();
     }
 
+    // public function registerCustomer(Request $request)
+    // {
+
+    //     try {
+    //         $request->validate([
+    //             'name' => 'required|string',
+    //             'email' => 'required|email|unique:users,email',
+    //             'password' => 'required|string|min:6',
+    //         ]);
+    //         $user = User::create([
+    //             'name' => $request->name,
+    //             'email' => $request->email,
+    //             'mobile_no' => $request->mobile_no,
+    //             'password' => Hash::make($request->password),
+    //             'confirm_password' => $request->confirm_password,
+    //             'address' => $request->address,
+    //             'zip_code' => $request->zip_code
+    //         ]);
+
+    //         $accessToken = $this->generateAccessToken($user->id);
+    //         $refreshToken = $this->generateRefreshToken($user->id);
+
+    //         $user->update([
+    //             'verify_phone' => true,
+    //             'access_token' => $accessToken,
+    //             'refresh_token' => $refreshToken,
+    //             'expires_at' => now()->addDay(1),
+    //         ]);
+
+    //         // Prepare response data
+    //         $data = [
+    //             "user_id" => $user->id,
+    //             "access_token" => $accessToken,
+    //             "refresh_token" => $refreshToken,
+    //         ];
+
+    //         // Return success response
+    //         return ApiService::response(true, $data, 'Registration Successful.');
+    //     } catch (\Exception $e) {
+    //         // If an exception occurs, return error response
+    //         return ApiService::response(false, null, $e->getMessage());
+    //     }
+    // }
+
+
     public function registerCustomer(Request $request)
     {
-
         try {
             $request->validate([
                 'name' => 'required|string',
@@ -120,7 +171,9 @@ class LoginApiController extends Controller
                 'password' => Hash::make($request->password),
                 'confirm_password' => $request->confirm_password,
                 'address' => $request->address,
-                'zip_code' => $request->zip_code
+                'zip_code' => $request->zip_code,
+                'status' => $request->status,
+                'payment_status' => $request->payment_status
             ]);
 
             $accessToken = $this->generateAccessToken($user->id);
@@ -138,16 +191,25 @@ class LoginApiController extends Controller
                 "user_id" => $user->id,
                 "access_token" => $accessToken,
                 "refresh_token" => $refreshToken,
+                "status" =>$user->status,
+                "payment_status" =>$user->payment_status
+
             ];
 
-            // Return success response
+            ///////send Email To Admin ////////////
+            $admin_email = Setting::get();
+            foreach ($admin_email as $admin_mail) {
+              Mail::to($admin_mail->email)->send(new RegisteredMail($user));
+            }
+
+            ////////////////// Welcome Mail to user ///////////////
+            Mail::to('yrabadia99@gmail.com')->send(new WelcomeMail($user));
+
             return ApiService::response(true, $data, 'Registration Successful.');
         } catch (\Exception $e) {
-            // If an exception occurs, return error response
             return ApiService::response(false, null, $e->getMessage());
         }
     }
-
     public function updateUserInfo(Request $request)
     {
         try {
@@ -260,7 +322,7 @@ class LoginApiController extends Controller
             $otp = $this->generateOtp();
             if ($isEmail) {
                 // Send OTP via email
-                $this->sendOtpViaEmail('yrabadia99@gmail.com', $otp);
+                $this->sendOtpViaEmail($user->email, $otp);
             }
             $resetTokenExpiration = now()->addHour();
 
@@ -342,7 +404,7 @@ class LoginApiController extends Controller
             'new_password' => 'required|min:8',
         ]);
 
-        $user = User::where('email',$request->email)->first();
+        $user = User::where('email', $request->email)->first();
 
         $user->password = bcrypt($request->new_password);
         $user->save();
