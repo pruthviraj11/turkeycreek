@@ -34,4 +34,8 @@ class PushNotification extends Model
         $this->attributes['status_flag'] = $value === 'read';
     }
 
+    public function users()
+    {
+        return $this->belongsToMany(User::class, 'push_notification_user');
+    }
 }

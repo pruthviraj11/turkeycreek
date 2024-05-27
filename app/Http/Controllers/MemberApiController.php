@@ -97,10 +97,11 @@ class MemberApiController extends Controller
         // Retrieve the Stripe customer
         $stripeCustomerId = $user->stripe_id;
         $customer = Customer::retrieve($stripeCustomerId);
-
         // Retrieve subscription data
+        $subscriptions = \Stripe\Subscription::all(['customer' => $stripeCustomerId]);
+
         $subscriptionDetails = [];
-        foreach ($customer->subscriptions->data as $subscription) {
+        foreach ($subscriptions->data as $subscription) {
             // Calculate remaining days until the subscription expires
             $startDate = Carbon::createFromTimestamp($subscription->created);
 
@@ -116,7 +117,7 @@ class MemberApiController extends Controller
             $subscriptionDetails[] = [
                 'id' => $subscription->id,
                 'status' => $subscription->status,
-                'start_date' => date('d/m/Y',$subscription->created),
+                'start_date' => date('d/m/Y', $subscription->created),
                 'current_period_end' => date('d/m/Y', $subscription->current_period_end),
                 'payment_method' => $subscription->default_payment_method,
                 'remaining_days' => $remainingDays,
@@ -129,7 +130,7 @@ class MemberApiController extends Controller
     }
 
 
-    public function cancel_subscription(Request $request,$subscriptionId)
+    public function cancel_subscription(Request $request, $subscriptionId)
     {
         Stripe::setApiKey(env('STRIPE_SECRET'));
 
@@ -144,9 +145,9 @@ class MemberApiController extends Controller
                 'cancellation_time' => $cancellationTime,
             ];
 
-            return ApiService::response(true, $data, 'Subscription cancellation scheduled successfully. It will end at the end of the current billing period, which is on '. $cancellationTime .'.');
+            return ApiService::response(true, $data, 'Subscription cancellation scheduled successfully. It will end at the end of the current billing period, which is on ' . $cancellationTime . '.');
 
-        }catch (\Exception $e) {
+        } catch (\Exception $e) {
             // Return JSON response with error message if cancellation fails
             return ApiService::response(false, null, 'Failed to cancel subscription. ' . $e->getMessage());
         }

@@ -38,49 +38,93 @@ class PushNotificationController extends Controller
         return view('notifications.notification-list', compact('users'));
     }
 
+    // public function store(Request $request)
+    // {
+    //     try {
+    //         $validatedData = $request->validate([
+    //             'notification_title' => 'required|string',
+    //             'notification_message_body' => 'required|string',
+    //             'selectedMembers' => 'array',
+    //         ]);
+    //         $data = [
+    //             'notification_title' => $validatedData['notification_title'],
+    //             'notification_message_body' => $validatedData['notification_message_body'],
+    //             'sendToAllMembers' => $request->has('sendToAllMembers'),
+    //             'notification_type' => $request['notification_type'],
+    //             // 'read_status' => $request->has('read_status'),
+    //         ];
+    //         if ($request->has('sendToAllMembers')) {
+    //             $users = User::all();
+    //             foreach ($users as $user) {
+    //                 $data['user_id'] = $user->id;
+    //                 $this->sendPushNotification($data, $user->notification_token);
+    //                 PushNotification::create($data);
+    //             }
+    //         }
+
+    //         if ($request->has('selectedMembers')) {
+    //             $selectedUsers = $validatedData['selectedMembers'];
+    //             $userData = User::whereIn('id', $selectedUsers)->get();
+    //             foreach ($userData as $user) {
+    //                 $data['user_id'] = $user->id;
+    //                 // $this->sendPushNotification($data, $user->notification_token);
+    //                 PushNotification::create($data);
+    //             }
+    //         }
+
+    //         return redirect()->route("pushNotification.index")
+    //             ->with('success', 'You have successfully sent notifications.');
+    //     } catch (\Exception $e) {
+    //         Log::error('Error sending notifications: ' . $e->getMessage());
+
+    //         return redirect()->route('pushNotification.index')
+    //             ->with('error', "Error sending notifications: {$e->getMessage()}");
+    //     }
+    // }
+
     public function store(Request $request)
-    {
-        try {
-            $validatedData = $request->validate([
-                'notification_title' => 'required|string',
-                'notification_message_body' => 'required|string',
-                'selectedMembers' => 'array',
-            ]);
-            $data = [
-                'notification_title' => $validatedData['notification_title'],
-                'notification_message_body' => $validatedData['notification_message_body'],
-                'sendToAllMembers' => $request->has('sendToAllMembers'),
-                'notification_type' => $request['notification_type'],
-                // 'read_status' => $request->has('read_status'),
-            ];
-            if ($request->has('sendToAllMembers')) {
-                $users = User::all();
-                foreach ($users as $user) {
-                    $data['user_id'] = $user->id;
-                    $this->sendPushNotification($data, $user->notification_token);
-                    PushNotification::create($data);
-                }
-            }
+{
+    try {
+        $validatedData = $request->validate([
+            'notification_title' => 'required|string',
+            'notification_message_body' => 'required|string',
+            'selectedMembers' => 'array',
+        ]);
 
-            if ($request->has('selectedMembers')) {
-                $selectedUsers = $validatedData['selectedMembers'];
-                $userData = User::whereIn('id', $selectedUsers)->get();
-                foreach ($userData as $user) {
-                    $data['user_id'] = $user->id;
-                    // $this->sendPushNotification($data, $user->notification_token);
-                    PushNotification::create($data);
-                }
-            }
+        $data = [
+            'notification_title' => $validatedData['notification_title'],
+            'notification_message_body' => $validatedData['notification_message_body'],
+            'sendToAllMembers' => $request->has('sendToAllMembers'),
+            'notification_type' => $request['notification_type'],
+        ];
 
-            return redirect()->route("pushNotification.index")
-                ->with('success', 'You have successfully sent notifications.');
-        } catch (\Exception $e) {
-            Log::error('Error sending notifications: ' . $e->getMessage());
+        // Create a single notification record
+        $notification = PushNotification::create($data);
 
-            return redirect()->route('pushNotification.index')
-                ->with('error', "Error sending notifications: {$e->getMessage()}");
+        // Determine the users to receive the notification
+        $users = [];
+        if ($request->has('sendToAllMembers')) {
+            $users = User::all();
+        } elseif ($request->has('selectedMembers')) {
+            $selectedUsers = $validatedData['selectedMembers'];
+            $users = User::whereIn('id', $selectedUsers)->get();
         }
+
+        // Attach users to the notification
+        foreach ($users as $user) {
+            $notification->users()->attach($user->id);
+            // $this->sendPushNotification($notification->toArray(), $user->notification_token);
+        }
+
+        return redirect()->route("pushNotification.index")
+            ->with('success', 'You have successfully sent notifications.');
+    } catch (\Exception $e) {
+        Log::error('Error sending notifications: ' . $e->getMessage());
+
+        return redirect()->route('pushNotification.index')
+            ->with('error', "Error sending notifications: {$e->getMessage()}");
     }
+}
 
     public function sendPushNotification($data, $deviceToken)
     {
