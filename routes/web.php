@@ -6,6 +6,7 @@ use App\Http\Controllers\EventController;
 use App\Http\Controllers\PushNotificationController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\WebViewController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\VipMembershipController;
@@ -67,7 +68,7 @@ Route::middleware('auth')->group(function () {
 
 
 
-    // Route For VIP Membership benifits
+    // Route For VIP Membership benifits Starts
 
     Route::view('vip_membership-list', 'vipMembership')->name('vip_membership');
     Route::get('vip_membership', [VipMembershipController::class, 'index'])->name('vip_membership.index');
@@ -77,9 +78,9 @@ Route::middleware('auth')->group(function () {
     Route::put('vip_membership/{vipMembership}', [VipMembershipController::class, 'update'])->name('vip_membership.update');
     Route::get('vip_membership/{vipMembership}', [VipMembershipController::class, 'destroy'])->name('vip_membership.destroy');
 
+    // Route For VIP Membership benifits Ends
 
 
-    // Route For VIP Membership benifits
 
     /////////////// Route For Event//////////
     Route::view('event-list', 'event')->name('event');
@@ -110,7 +111,7 @@ Route::middleware('auth')->group(function () {
 
     ///////////////////Route For Push Notification Starts/////////////////////////////
     Route::resource('pushNotification', PushNotificationController::class);
-    Route::get('pushNotificationList', [PushNotificationController::class,'list'])->name('pushNotification.list');
+    Route::get('pushNotificationList', [PushNotificationController::class, 'list'])->name('pushNotification.list');
     // Route::get('pushNotificationList', [PushNotificationController::class, 'list'])->name('pushNotification.listing');
 
     ///////////////////Route For Push Notification Ends/////////////////////////////
@@ -130,6 +131,19 @@ Route::middleware('auth')->group(function () {
 
 });
 
+///Web View Starts
+Route::get('striperegister/{VipMemberId}', [WebViewController::class, 'index'])->name('webview.index');
+Route::get('advertisement_details/add', [WebViewController::class, 'create'])->name('app-advertisement_details-add');
+Route::post('/update-default-payment-method', [WebViewController::class, 'updateDefaultPaymentMethod'])->name('update-default-payment-method');
+Route::post('/process-payment', [WebViewController::class, 'processPayment'])->name('processPayment');
+Route::get('/successpage', function () {
+    return view('successpage');
+})->name('successPage');
+
+Route::get('/failedpage', function () {
+    return view('failedpage');
+})->name('failedPage');
+/// Web View Ends
 
 require __DIR__ . '/auth.php';
 

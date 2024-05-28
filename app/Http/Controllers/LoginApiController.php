@@ -176,6 +176,12 @@ class LoginApiController extends Controller
                 'payment_status' => $request->payment_status
             ]);
 
+
+            $stripe = new \Stripe\StripeClient(env('STRIPE_SECRET'));
+            $data = $stripe->customers->create([
+                'name' => $request->name,
+                'email' => $request->email,
+            ]);
             $accessToken = $this->generateAccessToken($user->id);
             $refreshToken = $this->generateRefreshToken($user->id);
 
@@ -183,23 +189,24 @@ class LoginApiController extends Controller
                 'verify_phone' => true,
                 'access_token' => $accessToken,
                 'refresh_token' => $refreshToken,
+                'stripe_id' => $data->id,
                 'expires_at' => now()->addDay(1),
             ]);
 
             // Prepare response data
             $data = [
-                "user_id" => $user->id,
+                "user_id" => encrypt($user->id),
                 "access_token" => $accessToken,
                 "refresh_token" => $refreshToken,
-                "status" =>$user->status,
-                "payment_status" =>$user->payment_status
+                "status" => $user->status,
+                "payment_status" => $user->payment_status
 
             ];
 
             ///////send Email To Admin ////////////
             $admin_email = Setting::get();
             foreach ($admin_email as $admin_mail) {
-              Mail::to($admin_mail->email)->send(new RegisteredMail($user));
+                Mail::to($admin_mail->email)->send(new RegisteredMail($user));
             }
 
             ////////////////// Welcome Mail to user ///////////////

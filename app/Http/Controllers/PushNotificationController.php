@@ -83,48 +83,47 @@ class PushNotificationController extends Controller
     // }
 
     public function store(Request $request)
-{
-    try {
-        $validatedData = $request->validate([
-            'notification_title' => 'required|string',
-            'notification_message_body' => 'required|string',
-            'selectedMembers' => 'array',
-        ]);
+    {
+        try {
+            $validatedData = $request->validate([
+                'notification_title' => 'required|string',
+                'notification_message_body' => 'required|string',
+                'selectedMembers' => 'array',
+            ]);
 
-        $data = [
-            'notification_title' => $validatedData['notification_title'],
-            'notification_message_body' => $validatedData['notification_message_body'],
-            'sendToAllMembers' => $request->has('sendToAllMembers'),
-            'notification_type' => $request['notification_type'],
-        ];
+            $data = [
+                'notification_title' => $validatedData['notification_title'],
+                'notification_message_body' => $validatedData['notification_message_body'],
+                'sendToAllMembers' => $request->has('sendToAllMembers'),
+                'notification_type' => $request['notification_type'],
+            ];
 
-        // Create a single notification record
-        $notification = PushNotification::create($data);
+            $notification = PushNotification::create($data);
 
-        // Determine the users to receive the notification
-        $users = [];
-        if ($request->has('sendToAllMembers')) {
-            $users = User::all();
-        } elseif ($request->has('selectedMembers')) {
-            $selectedUsers = $validatedData['selectedMembers'];
-            $users = User::whereIn('id', $selectedUsers)->get();
+            $users = [];
+            if ($request->has('sendToAllMembers')) {
+                $users = User::all();
+            } elseif ($request->has('selectedMembers')) {
+                $selectedUsers = $validatedData['selectedMembers'];
+                $users = User::whereIn('id', $selectedUsers)->get();
+            }
+
+            foreach ($users as $user) {
+                $notification->users()->attach($user->id);
+                if (!empty($user->notification_token)) {
+                    // $this->sendPushNotification($notification->toArray(), $user->notification_token);
+                }
+            }
+
+            return redirect()->route("pushNotification.index")
+                ->with('success', 'You have successfully sent notifications.');
+        } catch (\Exception $e) {
+            Log::error('Error sending notifications: ' . $e->getMessage());
+
+            return redirect()->route('pushNotification.index')
+                ->with('error', "Error sending notifications: {$e->getMessage()}");
         }
-
-        // Attach users to the notification
-        foreach ($users as $user) {
-            $notification->users()->attach($user->id);
-            // $this->sendPushNotification($notification->toArray(), $user->notification_token);
-        }
-
-        return redirect()->route("pushNotification.index")
-            ->with('success', 'You have successfully sent notifications.');
-    } catch (\Exception $e) {
-        Log::error('Error sending notifications: ' . $e->getMessage());
-
-        return redirect()->route('pushNotification.index')
-            ->with('error', "Error sending notifications: {$e->getMessage()}");
     }
-}
 
     public function sendPushNotification($data, $deviceToken)
     {
@@ -150,10 +149,7 @@ class PushNotificationController extends Controller
         // $events = Event::paginate(8);
 
         if ($request->ajax()) {
-            $events = PushNotification::select('push_notifications.*')->orderBy('id','desc')->get();
-
-
-
+            $events = PushNotification::select('push_notifications.*')->orderBy('id', 'desc')->get();
 
             return Datatables::of($events)
                 ->addIndexColumn()

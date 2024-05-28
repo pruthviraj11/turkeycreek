@@ -45,7 +45,9 @@ class NotificationApiController extends Controller
 
             $offset = ($page - 1) * $perPage;
 
-            $notifications = PushNotification::where('user_id', $userId)->skip($offset)->take($perPage)->get();
+            $notifications = PushNotification::select('push_notifications.*')
+            ->leftJoin('push_notification_user','push_notifications.id','=','push_notification_user.push_notification_id')
+            ->where('push_notification_user.user_id', $userId)->skip($offset)->take($perPage)->get();
 
             $notifications = $notifications->map(function ($notification) {
                 $notification->notification_title = $notification->notification_title ?? '';

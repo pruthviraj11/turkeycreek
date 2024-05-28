@@ -38,7 +38,10 @@ class User extends Authenticatable
         'image',
         'status',
         'payment_status',
-        'last_logged_In'
+        'last_logged_In',
+        'stripe_id',
+        'subscription_id',
+
     ];
 
     /**
