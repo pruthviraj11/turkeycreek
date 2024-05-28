@@ -65,6 +65,7 @@ class LoginApiController extends Controller
                 "user_id" => $user->id,
                 "access_token" => $accessToken,
                 "refresh_token" => $refreshToken,
+                "payment_status" => $user->payment_status
             ];
 
             return ApiService::response(true, $data, 'Login Successful.');
